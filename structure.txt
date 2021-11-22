@@ -1,0 +1,17 @@
+The robot is in a “glove box”. The task is to pick colored vials and put them in a centrifuge.
+The user is outside of the glove box and uses a UI to select which vial to pick and which one to put in the centrifuge.
+Then the robot picks the vials back and puts them on the rack.
+
+Object list:
+App object:
+    Contains the whole app and UI
+
+Main_rack object:
+    Object that tracks the status of the main rack
+
+Centrifuge_Object:
+    Object that tracks the status of the centrifuge object
+
+Robot object:
+    mecademicpy.robot.Robot object to control the robot
+
