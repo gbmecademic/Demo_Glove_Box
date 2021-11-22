@@ -6,12 +6,28 @@ Object list:
 App object:
     Contains the whole app and UI
 
+Vial object:
+    Might not be necessary for our application but would be useful for better tracking in a real application.
+
+Rack_socket object:
+    An object that will be generated inside the Main_rack class. Will track the status of the rack and could be used to add more info in a real application.
+    Attributes:
+        status : empty or not
+        position : Where in the rack is it in (x,y,z,rx,ry,rz)
+        vial_object: Not used but would contain the info of the vial if the Vial object was used.
+
 Main_rack object:
     Object that tracks the status of the main rack
+    Attributes:
+        Vial_sockets: List of the number of vial sockets in the rack.
+
+Centrifuge_socket object:
+    Similar to the Rack_socket object but might have some extra options such as controlling LEDs.
 
 Centrifuge_Object:
     Object that tracks the status of the centrifuge object
 
 Robot object:
     mecademicpy.robot.Robot object to control the robot
+    This one already exist but will be inside the App.
 
