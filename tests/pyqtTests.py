@@ -1,4 +1,4 @@
-from frontend.customWidgets import RackStatus, StatusImage
+from frontend.customWidgets import RackStatus, StatusImage, CustomToggleButton
 from PyQt5.QtWidgets import QApplication, QGridLayout, QLabel, QPushButton, QWidget
 
 class Apptest(QWidget):
@@ -10,7 +10,7 @@ class Apptest(QWidget):
         self.grid = QGridLayout()
         self.setLayout(self.grid)
         self.rs = RackStatus()
-        self.button = QPushButton()
+        self.button = CustomToggleButton()
         self.test_flag = True
 
         self.grid.addWidget(self.rs)
