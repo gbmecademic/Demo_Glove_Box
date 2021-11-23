@@ -4,6 +4,7 @@ Then the robot picks the vials back and puts them on the rack.
 
 
 Application structure:
+    Need to do some design work for the window.
     Main window:
         Displays the status of the rack
         Displays the status of the centrifuge
