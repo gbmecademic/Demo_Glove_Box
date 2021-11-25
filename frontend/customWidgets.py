@@ -79,12 +79,26 @@ class CentStatus(QWidget):
         self.led_pos_list = [(185, 25), (320, 100), (320, 250), (185, 325), (50, 250), (50, 100)]
 
         self.led_list = []
+        self.led_state = [False]*6
         for i in range(6):
             self.led_list.append(QLabel(self.frame))
             self.led_list[i].setStyleSheet("background-color: transparent")
             self.led_list[i].setPixmap(self.led_off_pm)
             self.led_list[i].setGeometry(QRect(*self.led_pos_list[i], 50, 50))
 
+    def toggle_led(self, pos):
+        if not self.led_state[pos]:
+            self.led_list[pos].setPixmap(self.led_on_pm)
+            self.led_state[pos] = True
+        else:
+            self.led_list[pos].setPixmap(self.led_off_pm)
+            self.led_state[pos] = False
+
+    def turn_vial_on(self, pos):
+        self.led_list[pos].setPixmap(self.led_on_pm)
+
+    def turn_vial_off(self, pos):
+        self.led_list[pos].setPixmap(self.led_off_pm)
 
 class RackButtons(QWidget):
     def __init__(self, parent=None, *args, **kwargs):

@@ -17,14 +17,14 @@
    <widget class="QPushButton" name="LoadButton">
     <property name="geometry">
      <rect>
-      <x>280</x>
-      <y>560</y>
+      <x>150</x>
+      <y>570</y>
       <width>151</width>
       <height>91</height>
      </rect>
     </property>
     <property name="text">
-     <string>Load</string>
+     <string>Load selected vials</string>
     </property>
    </widget>
    <widget class="CentStatus" name="CentStatusDisplay" native="true">
@@ -156,6 +156,19 @@
       </rect>
      </property>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="buttonCentrifuge">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>570</y>
+      <width>151</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Start Centrifuge</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

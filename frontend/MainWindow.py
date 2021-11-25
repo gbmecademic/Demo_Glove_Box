@@ -18,7 +18,7 @@ class Ui_MainWindow(object):
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.LoadButton = QtWidgets.QPushButton(self.centralwidget)
-        self.LoadButton.setGeometry(QtCore.QRect(280, 560, 151, 91))
+        self.LoadButton.setGeometry(QtCore.QRect(150, 570, 151, 91))
         self.LoadButton.setObjectName("LoadButton")
         self.CentStatusDisplay = CentStatus(self.centralwidget)
         self.CentStatusDisplay.setGeometry(QtCore.QRect(150, 120, 400, 400))
@@ -64,6 +64,9 @@ class Ui_MainWindow(object):
         self.RackSelection = RackButtons(self.ButtonsFrame)
         self.RackSelection.setGeometry(QtCore.QRect(2, 2, 300, 250))
         self.RackSelection.setObjectName("RackSelection")
+        self.buttonCentrifuge = QtWidgets.QPushButton(self.centralwidget)
+        self.buttonCentrifuge.setGeometry(QtCore.QRect(400, 570, 151, 91))
+        self.buttonCentrifuge.setObjectName("buttonCentrifuge")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1209, 21))
@@ -85,9 +88,10 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Centrifuge Controls 9000"))
-        self.LoadButton.setText(_translate("MainWindow", "Load"))
+        self.LoadButton.setText(_translate("MainWindow", "Load selected vials"))
         self.labelRackStatus.setText(_translate("MainWindow", "Vial Rack Status"))
         self.label.setText(_translate("MainWindow", "Select which vial to load"))
+        self.buttonCentrifuge.setText(_translate("MainWindow", "Start Centrifuge"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionSetup.setText(_translate("MainWindow", "Setup"))
 from frontend.customWidgets import CentStatus, RackButtons, RackStatus
