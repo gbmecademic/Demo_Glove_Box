@@ -103,12 +103,27 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         ### Button connections ###
 
-        self.RackSelection.button_list[0].clicked.connect(self.print_data)
         self.LoadButton.clicked.connect(self.load_centrifuge)
+        self.RackSelection.button_list[0].clicked.connect(lambda: self.toggle_select_vial(0))
+        self.RackSelection.button_list[1].clicked.connect(lambda: self.toggle_select_vial(1))
+        self.RackSelection.button_list[2].clicked.connect(lambda: self.toggle_select_vial(2))
+        self.RackSelection.button_list[3].clicked.connect(lambda: self.toggle_select_vial(3))
+        self.RackSelection.button_list[4].clicked.connect(lambda: self.toggle_select_vial(4))
+        self.RackSelection.button_list[5].clicked.connect(lambda: self.toggle_select_vial(5))
+
+        #for i, button in enumerate(self.RackSelection.button_list):
+        #    button.clicked.connect(lambda: self.toggle_select_vial(i))
 
 
     def open_setup(self):
         self.setup_window.show()
+
+    def toggle_select_vial(self, n):
+        self.rack.vial_selected[n] = not self.rack.vial_selected[n]
+
+    def connect_to_robot(self):
+        self.robot.Connect()
+        self.robot.ActivateAndHome()
 
     def load_centrifuge(self):
         # Check centrifuge status
@@ -132,7 +147,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             msgbox.exec()
             return
         # Check selected vials status
-        if not True in self.rack.vial_selected:
+        if not (True in self.rack.vial_selected):
             msgbox = QtWidgets.QMessageBox()
             msgbox.setIcon(QtWidgets.QMessageBox.Information)
             msgbox.setText("Please select one or multiple vials before loading.")
@@ -142,7 +157,11 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             msgbox.exec()
             return
         # Load them in the centrifuge
-        pass
+
+        for i, st in enumerate(self.rack.vial_selected):
+            if st:
+                self.RackStatusDisplay.turn_vial_off(i)
+
 
 
 
