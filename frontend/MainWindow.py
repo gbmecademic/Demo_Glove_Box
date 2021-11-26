@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'frontend\MainWindow.ui'
+# Form implementation generated from reading ui file 'frontend/MainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -67,9 +67,12 @@ class Ui_MainWindow(object):
         self.buttonCentrifuge = QtWidgets.QPushButton(self.centralwidget)
         self.buttonCentrifuge.setGeometry(QtCore.QRect(400, 570, 151, 91))
         self.buttonCentrifuge.setObjectName("buttonCentrifuge")
+        self.buttonRobot = QtWidgets.QPushButton(self.centralwidget)
+        self.buttonRobot.setGeometry(QtCore.QRect(150, 710, 401, 41))
+        self.buttonRobot.setObjectName("buttonRobot")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1209, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1209, 22))
         self.menubar.setObjectName("menubar")
         self.menuOptions = QtWidgets.QMenu(self.menubar)
         self.menuOptions.setObjectName("menuOptions")
@@ -92,6 +95,7 @@ class Ui_MainWindow(object):
         self.labelRackStatus.setText(_translate("MainWindow", "Vial Rack Status"))
         self.label.setText(_translate("MainWindow", "Select which vial to load"))
         self.buttonCentrifuge.setText(_translate("MainWindow", "Start Centrifuge"))
+        self.buttonRobot.setText(_translate("MainWindow", "Robot Connection"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionSetup.setText(_translate("MainWindow", "Setup"))
 from frontend.customWidgets import CentStatus, RackButtons, RackStatus
