@@ -65,7 +65,6 @@ class CentStatus(QWidget):
         self.framebg = QLabel(parent=self.frame)
         current_dir = os.path.dirname(os.path.realpath(__file__))
         self.bgpath = os.path.join(current_dir, 'images/Centrifuge_Positions.png')
-        print(self.bgpath)
         self.bgpixmap = QPixmap(self.bgpath)
         self.bgpixmap = self.bgpixmap.scaled(400, 400)
         self.framebg.setPixmap(self.bgpixmap)
