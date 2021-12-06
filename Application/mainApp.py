@@ -1,8 +1,9 @@
 from PyQt5 import QtWidgets
+from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QPixmap
 from backend.backend import MainRack, Centrifuge
 from frontend import customWidgets, MainWindow, SetupWindow
-from mecademicpy.robot import Robot
+from mecademicpy.robot import CommunicationError, Robot
 import os
 import re
 
@@ -111,8 +112,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.RackSelection.button_list[4].clicked.connect(lambda: self.toggle_select_vial(4))
         self.RackSelection.button_list[5].clicked.connect(lambda: self.toggle_select_vial(5))
 
-        #for i, button in enumerate(self.RackSelection.button_list):
-        #    button.clicked.connect(lambda: self.toggle_select_vial(i))
+        self.buttonCentrifuge.clicked.connect(self.start_centrifuge)
+        self.buttonRobot.clicked.connect(self.connect_to_robot)
 
 
     def open_setup(self):
@@ -122,8 +123,17 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.rack.vial_selected[n] = not self.rack.vial_selected[n]
 
     def connect_to_robot(self):
-        self.robot.Connect()
-        self.robot.ActivateAndHome()
+        if not self.robot.IsConnected():
+            try:
+                self.robot.Connect()
+                self.robot.ActivateAndHome()
+                self.robot.WaitHomed()
+                self.buttonRobot.setStyleSheet("background-color:rgba(0,255,0,255)")
+            except CommunicationError as e:
+                print(e)
+        else:
+            self.robot.Disconnect()
+            self.buttonRobot.setStyleSheet("background-color:rgba(0,0,0,125)")
 
     def load_centrifuge(self):
         # Check centrifuge status
@@ -161,8 +171,40 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         for i, st in enumerate(self.rack.vial_selected):
             if st:
                 self.RackStatusDisplay.turn_vial_off(i)
+                # Move to pick
+                pick_pos = self.rack.rack_position[i].copy()
+                pick_approach = pick_pos.copy()
+                pick_approach[2] += 30
+                self.robot.MovePose(*pick_approach)
+                self.robot.MoveLin(*pick_pos)
+                self.robot.MovePose(*self.centrifuge.rack_position[i])
+                cp = self.robot.SetCheckpoint(50)
+                cp.wait()
+                self.RackSelection.button_list[i].setChecked(False)
+                self.RackSelection.button_list[i]._on_pressed_col_change()
+                self.RackSelection.button_list[i].setEnabled(False)
+                self.CentStatusDisplay.toggle_led(i)
+                QCoreApplication.processEvents()
+
+    def start_centrifuge(self):
+        # Reset everything
+        for but in self.RackSelection.button_list:
+            but.setEnabled(True)
+        
+        for i in range(6):
+            self.RackStatusDisplay.turn_vial_on(i)
+            if self.CentStatusDisplay.led_state[i]:
+                self.CentStatusDisplay.toggle_led(i)
+
+        self.centrifuge.cent_status = True
 
 
+    def closeEvent(self, event):
+        if not self.robot.IsConnected():
+            self.robot.Connect()
+        self.robot.DeactivateRobot()
+        self.robot.Disconnect()
+        super().closeEvent(event)
 
 
     ### Test functions ###
