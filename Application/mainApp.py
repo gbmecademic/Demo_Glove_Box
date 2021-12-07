@@ -1,11 +1,12 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QPixmap
-from backend.backend import MainRack, Centrifuge
+from backend.backend import MainRack, Centrifuge, projectvector
 from frontend import customWidgets, MainWindow, SetupWindow
 from mecademicpy.robot import CommunicationError, Robot
 import os
 import re
+import numpy as np
 
 class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
     def __init__(self, rack, centrifuge, *args, **kwargs):
@@ -167,17 +168,32 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             msgbox.exec()
             return
         # Load them in the centrifuge
+        self.robot.SetTRF(36,0,14,0,-90,0)
+        self.robot.GripperOpen()
 
         for i, st in enumerate(self.rack.vial_selected):
             if st:
                 self.RackStatusDisplay.turn_vial_off(i)
-                # Move to pick
-                pick_pos = self.rack.rack_position[i].copy()
-                pick_approach = pick_pos.copy()
-                pick_approach[2] += 30
-                self.robot.MovePose(*pick_approach)
-                self.robot.MoveLin(*pick_pos)
-                self.robot.MovePose(*self.centrifuge.rack_position[i])
+                # Picking
+                pick_point = self.rack.rack_position[i]
+                self.robot.SetWRF(*pick_point)              # Used for approach
+                self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+                self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+                self.robot.GripperClose()
+                self.robot.Delay(1)
+                self.robot.MoveLin(0, 0, 20, 0, 0, 0)
+
+                # Placing
+                place_point = self.centrifuge.rack_position[i]
+                self.robot.SetWRF(*place_point)
+                self.robot.MovePose(0, 0, 20, 0, 0, 0)      # Approach, modify this depending on the orientation
+                self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+                self.robot.GripperOpen()
+                self.robot.Delay(1)
+                self.robot.MoveLin(-16, 0, 0, 0, 0, 0)
+                
+                
+                # UI stuff
                 cp = self.robot.SetCheckpoint(50)
                 cp.wait()
                 self.RackSelection.button_list[i].setChecked(False)
@@ -186,13 +202,16 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
                 QCoreApplication.processEvents()
 
+
     def start_centrifuge(self):
         # Reset everything
         for but in self.RackSelection.button_list:
             but.setEnabled(True)
+            but.setChecked(False)
         
         for i in range(6):
             self.RackStatusDisplay.turn_vial_on(i)
+            self.rack.vial_selected[i] = False
             if self.CentStatusDisplay.led_state[i]:
                 self.CentStatusDisplay.toggle_led(i)
 

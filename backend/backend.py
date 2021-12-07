@@ -1,4 +1,6 @@
 from mecademicpy.robot import Robot
+from scipy.spatial.transform import Rotation
+import numpy as np
 
 
 class MainRack():
@@ -31,3 +33,9 @@ class Centrifuge():
 
     def update_status(self, n, status):
         self.rack_status[n] = status
+
+
+def projectvector(mov_vect, rot_vect):
+    rot_mat = Rotation.from_euler('ZYX', rot_vect)
+    rot_mat_num = rot_mat.as_matrix().transpose()
+    return np.dot(rot_mat_num, mov_vect)
