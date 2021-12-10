@@ -21,50 +21,76 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
         if self.cent_pos_1.text():
             pos = self._text_to_list(self.cent_pos_1.text())
             self.centrifuge.update_position(0, pos)
+            pick_dir = self.pick_dir_1.currentText()
+            print(pick_dir)
+            self.rack.rack_pick_dir[0] = True if pick_dir == 'Regular' else False
 
         if self.cent_pos_2.text():
             pos = self._text_to_list(self.cent_pos_2.text())
             self.centrifuge.update_position(1, pos)
+            pick_dir = self.pick_dir_2.currentText()
+            print(pick_dir)
+            self.rack.rack_pick_dir[1] = True if pick_dir == 'Regular' else False
 
         if self.cent_pos_3.text():
             pos = self._text_to_list(self.cent_pos_3.text())
             self.centrifuge.update_position(2, pos)
+            pick_dir = self.pick_dir_3.currentText()
+            self.rack.rack_pick_dir[2] = True if pick_dir == 'Regular' else False
 
         if self.cent_pos_4.text():
             pos = self._text_to_list(self.cent_pos_4.text())
             self.centrifuge.update_position(3, pos)
+            pick_dir = self.pick_dir_4.currentText()
+            self.rack.rack_pick_dir[3] = True if pick_dir == 'Regular' else False
 
         if self.cent_pos_5.text():
             pos = self._text_to_list(self.cent_pos_5.text())
             self.centrifuge.update_position(4, pos)
+            pick_dir = self.pick_dir_5.currentText()
+            self.rack.rack_pick_dir[4] = True if pick_dir == 'Regular' else False
 
         if self.cent_pos_6.text():
             pos = self._text_to_list(self.cent_pos_6.text())
             self.centrifuge.update_position(5, pos)
+            pick_dir = self.pick_dir_6.currentText()
+            self.rack.rack_pick_dir[5] = True if pick_dir == 'Regular' else False
 
         if self.rack_pos_1.text():
             pos = self._text_to_list(self.rack_pos_1.text())
             self.rack.update_position(0, pos)
+            pick_dir = self.pick_dir_1.currentText()
+            self.rack.rack_pick_dir[0] = True if pick_dir == 'Regular' else False
 
         if self.rack_pos_2.text():
             pos = self._text_to_list(self.rack_pos_2.text())
             self.rack.update_position(1, pos)
+            pick_dir = self.pick_dir_2.currentText()
+            self.rack.rack_pick_dir[1] = True if pick_dir == 'Regular' else False
             
         if self.rack_pos_3.text():
             pos = self._text_to_list(self.rack_pos_3.text())
             self.rack.update_position(2, pos)
+            pick_dir = self.pick_dir_3.currentText()
+            self.rack.rack_pick_dir[2] = True if pick_dir == 'Regular' else False
 
         if self.rack_pos_4.text():
             pos = self._text_to_list(self.rack_pos_4.text())
             self.rack.update_position(3, pos)
+            pick_dir = self.pick_dir_4.currentText()
+            self.rack.rack_pick_dir[3] = True if pick_dir == 'Regular' else False
 
         if self.rack_pos_5.text():
             pos = self._text_to_list(self.rack_pos_5.text())
             self.rack.update_position(4, pos)
+            pick_dir = self.pick_dir_5.currentText()
+            self.rack.rack_pick_dir[4] = True if pick_dir == 'Regular' else False
 
         if self.rack_pos_6.text():
             pos = self._text_to_list(self.rack_pos_6.text())
             self.rack.update_position(5, pos)
+            pick_dir = self.pick_dir_6.currentText()
+            self.rack.rack_pick_dir[5] = True if pick_dir == 'Regular' else False
 
 
 
@@ -176,12 +202,10 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.RackStatusDisplay.turn_vial_off(i)
                 # Picking
                 pick_point = self.rack.rack_position[i]
-                self.robot.SetWRF(*pick_point)              # Used for approach
-                self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
-                self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
-                self.robot.GripperClose()
-                self.robot.Delay(1)
-                self.robot.MoveLin(0, 0, 20, 0, 0, 0)
+                if self.rack.rack_pick_dir[i]:
+                    self.pick_reg(pick_point)
+                else:
+                    self.pick_front(pick_point)
 
                 # Placing
                 place_point = self.centrifuge.rack_position[i]
@@ -202,6 +226,40 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
                 QCoreApplication.processEvents()
 
+
+    def pick_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+        self.robot.GripperClose()
+        self.robot.Delay(1)
+        self.robot.MoveLin(0, 0, 50, 0, 0, 0)
+
+
+    def pick_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 20, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 40, 0, 0, 0)
+
+    def place_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.Delay(0.5)
+        self.robot.MoveLin(-20, 0, 0, 0, 0, 0)
+
+    def place_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, -80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
 
     def start_centrifuge(self):
         # Reset everything
