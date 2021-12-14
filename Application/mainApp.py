@@ -194,7 +194,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             msgbox.exec()
             return
         # Load them in the centrifuge
-        self.robot.SetTRF(36,0,14,0,-90,0)
+        self.robot.SetJointVel(5)
+        self.robot.SetCartLinVel(10)
         self.robot.GripperOpen()
 
         for i, st in enumerate(self.rack.vial_selected):
@@ -209,14 +210,19 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
                 self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
 
-                # Placing
                 place_point = self.centrifuge.rack_position[i]
-                self.robot.SetWRF(*place_point)
-                self.robot.MovePose(0, 0, 20, 0, 0, 0)      # Approach, modify this depending on the orientation
-                self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
-                self.robot.GripperOpen()
-                self.robot.Delay(1)
-                self.robot.MoveLin(-16, 0, 0, 0, 0, 0)
+                if self.rack.rack_pick_dir[i]:
+                    self.place_reg(place_point)
+                else:
+                    self.place_front(place_point)
+                # Placing
+                #place_point = self.centrifuge.rack_position[i]
+                #self.robot.SetWRF(*place_point)
+                #self.robot.MovePose(0, 0, 80, 0, 0, 0)      # Approach, modify this depending on the orientation
+                #self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+                #self.robot.GripperOpen()
+                #self.robot.Delay(1)
+                #self.robot.MoveLin(-30, 0, 0, 0, 0, 0)
                 
                 
                 # UI stuff
@@ -232,11 +238,12 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def pick_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
         self.robot.SetWRF(*point)
+        self.robot.MovePose(-16, 0, 30, 0, 0, 0)
         self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
         self.robot.GripperClose()
         self.robot.Delay(1)
-        self.robot.MoveLin(0, 0, 50, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 120, 0, 0, 0)
 
 
     def pick_front(self, point):
@@ -246,7 +253,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperClose()
         self.robot.Delay(0.5)
-        self.robot.MoveLin(0, 0, 40, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 80, 0, 0, 0)
 
     def place_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
@@ -308,7 +315,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def closeEvent(self, event):
         if not self.robot.IsConnected():
             self.robot.Connect()
-        self.robot.DeactivateRobot()
+        #self.robot.DeactivateRobot()
         self.robot.Disconnect()
         super().closeEvent(event)
 
