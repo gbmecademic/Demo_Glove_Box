@@ -207,6 +207,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 else:
                     self.pick_front(pick_point)
 
+                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+
                 # Placing
                 place_point = self.centrifuge.rack_position[i]
                 self.robot.SetWRF(*place_point)
@@ -258,8 +260,35 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def place_front(self, point):
         self.robot.SetTRF(30, 0, 17, -180, 0, -180)
         self.robot.SetWRF(*point)
-        self.robot.MovePose(0, 0, -80, 0, 0, 0)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0 ,0)
+
+    def ret_pick_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0 ,0)
+
+    def ret_pick_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(-20, 0, 0, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0, 0)
+
+    def ret_place_front(self, point):
+        pass
+
+    def ret_place_reg(self, point):
+        pass
 
     def start_centrifuge(self):
         # Reset everything
