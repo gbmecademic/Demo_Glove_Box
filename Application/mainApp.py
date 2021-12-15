@@ -274,7 +274,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MovePose(0, 0, 80, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperOpen()
-        self.Delay(0.5)
+        self.robot.Delay(0.5)
         self.robot.MoveLin(-20, 0, 0, 0, 0, 0)
 
     def place_front(self, point):
