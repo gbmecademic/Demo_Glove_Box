@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QPixmap
-from backend.backend import MainRack, Centrifuge, projectvector
-from frontend import customWidgets, MainWindow, SetupWindow
+from backend.backend import MainRack, Centrifuge
+from frontend import customWidgets, MainWindow, SetupWindow, ProgressWindow
 from mecademicpy.robot import CommunicationError, Robot
 import os
 import re
@@ -93,15 +93,18 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
             self.rack.rack_pick_dir[5] = True if pick_dir == 'Regular' else False
 
 
-
-
-
     def _text_to_list(self, text):
         text = re.sub('[()]', '', text)
         text_split = text.split(',')
         num_list = [float(i) for i in text_split]
         return num_list
         
+
+class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
+    def __init__(self, rack, centrifuge, *args, **kwargs):
+        QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
+        self.setupUi(self)
+        self.progressBar.setValue(69)
 
 
 class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
@@ -129,6 +132,9 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         self.actionSetup.triggered.connect(self.open_setup)
 
+        ### Progress Window Setup ###
+        self.progress_window = ProgressWindowApp(self.rack, self.centrifuge)
+
         ### Button connections ###
 
         self.LoadButton.clicked.connect(self.load_centrifuge)
@@ -145,6 +151,9 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def open_setup(self):
         self.setup_window.show()
+
+    def open_progress(self):
+        self.progress_window.show()
 
     def toggle_select_vial(self, n):
         self.rack.vial_selected[n] = not self.rack.vial_selected[n]
@@ -301,6 +310,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
 
         self.centrifuge.cent_status = True
+
+        self.open_progress()
 
 
     def closeEvent(self, event):
