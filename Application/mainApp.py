@@ -215,15 +215,6 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                     self.place_reg(place_point)
                 else:
                     self.place_front(place_point)
-                # Placing
-                #place_point = self.centrifuge.rack_position[i]
-                #self.robot.SetWRF(*place_point)
-                #self.robot.MovePose(0, 0, 80, 0, 0, 0)      # Approach, modify this depending on the orientation
-                #self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
-                #self.robot.GripperOpen()
-                #self.robot.Delay(1)
-                #self.robot.MoveLin(-30, 0, 0, 0, 0, 0)
-                
                 
                 # UI stuff
                 cp = self.robot.SetCheckpoint(50)

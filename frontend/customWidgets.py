@@ -75,7 +75,7 @@ class CentStatus(QWidget):
         self.led_on_pm = self.led_on_pm.scaled(30, 30)
         self.led_off_pm = QPixmap(self.led_off_path)
         self.led_off_pm = self.led_off_pm.scaled(30, 30)
-        self.led_pos_list = [(185, 25), (320, 100), (320, 250), (185, 325), (50, 250), (50, 100)]
+        self.led_pos_list = [(50, 100), (185, 25), (320, 100), (320, 250), (185, 325), (50, 250)]
 
         self.led_list = []
         self.led_state = [False]*6
@@ -105,7 +105,7 @@ class RackButtons(QWidget):
         self.grid = QGridLayout()
         self.button_list = []
         for i in range(6):
-            self.button_list.append(CustomToggleButton(f"Vial {i}"))
+            self.button_list.append(CustomToggleButton(f"Vial {i+1}"))
 
         positions = [(i, j) for i in range(2) for j in range(3)]
 
