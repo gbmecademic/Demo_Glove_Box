@@ -7,6 +7,7 @@ from mecademicpy.robot import CommunicationError, Robot
 import os
 import re
 import numpy as np
+from time import sleep
 
 class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
     def __init__(self, rack, centrifuge, *args, **kwargs):
@@ -104,7 +105,18 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
     def __init__(self, rack, centrifuge, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
         self.setupUi(self)
-        self.progressBar.setValue(69)
+        self.progressBar.setValue(0)
+        self.label.setText("Starting the centrifuge")
+        
+
+    def start_progress(self):
+        QCoreApplication.processEvents()
+        sleep(5)
+        self.label.setText("Processing Samples")
+        for i in range(100):
+            self.progressBar.setValue(i+1)
+            sleep(0.1)
+            QCoreApplication.processEvents()
 
 
 class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
@@ -154,6 +166,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def open_progress(self):
         self.progress_window.show()
+        self.progress_window.start_progress()
 
     def toggle_select_vial(self, n):
         self.rack.vial_selected[n] = not self.rack.vial_selected[n]
@@ -292,32 +305,40 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(0, 0, 80, 0, 0, 0)
 
     def ret_place_front(self, point):
-        pass
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 20, 0, 0, 0)
 
     def ret_place_reg(self, point):
-        pass
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MoveLin(0, 0, 120, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+        self.robot.MovePose(-16, 0, 30, 0, 0, 0)
 
     def start_centrifuge(self):
-        # Reset everything
-        for but in self.RackSelection.button_list:
-            but.setEnabled(True)
-            but.setChecked(False)
-        
-        for i in range(6):
-            self.RackStatusDisplay.turn_vial_on(i)
-            self.rack.vial_selected[i] = False
-            if self.CentStatusDisplay.led_state[i]:
+        self.open_progress()
+
+        ### Place back the vials ###
+        for i, st in enumerate(self.rack.vial_selected):
+            if st:
+                self.RackSelection.button_list[i].setEnabled(True)
+                self.RackSelection.button_list[i].setChecked(False)
+                self.RackStatusDisplay.turn_vial_on(i)
+                self.rack.vial_selected[i] = False
                 self.CentStatusDisplay.toggle_led(i)
 
         self.centrifuge.cent_status = True
 
-        self.open_progress()
-
 
     def closeEvent(self, event):
-        if not self.robot.IsConnected():
-            self.robot.Connect()
-        #self.robot.DeactivateRobot()
         self.robot.Disconnect()
         super().closeEvent(event)
 
