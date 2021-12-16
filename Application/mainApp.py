@@ -325,12 +325,12 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def ret_place_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
         self.robot.SetWRF(*point)
-        self.robot.MoveLin(0, 0, 120, 0, 0, 0)
+        self.robot.MovePose(0, 0, 120, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
         self.robot.GripperOpen()
         self.robot.Delay(0.5)
-        self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
-        self.robot.MovePose(-16, 0, 30, 0, 0, 0)
+        self.robot.MoveLin(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+        self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
 
     def start_centrifuge(self):
         self.open_progress()
