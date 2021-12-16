@@ -225,8 +225,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
             msgbox.exec()
             return
         # Load them in the centrifuge
-        self.robot.SetJointVel(5)
-        self.robot.SetCartLinVel(10)
+        self.robot.SetJointVel(15)
+        self.robot.SetCartLinVel(30)
         self.robot.GripperOpen()
 
         for i, st in enumerate(self.rack.vial_selected):
@@ -310,7 +310,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MovePose(-30, 0, 0, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperClose()
-        self.Delay(0.5)
+        self.robot.Delay(0.5)
         self.robot.MoveLin(0, 0, 80, 0, 0, 0)
 
     def ret_place_front(self, point):
@@ -338,6 +338,10 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.unload_window()
 
         ### Place back the vials ###
+        self.robot.SetJointVel(10)
+        self.robot.SetCartLinVel(10)
+        self.robot.GripperOpen()
+        
         for i, st in enumerate(self.rack.vial_selected):
             if st:
 
