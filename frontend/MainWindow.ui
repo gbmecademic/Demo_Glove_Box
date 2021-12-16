@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1209</width>
-    <height>857</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>570</y>
+      <y>540</y>
       <width>151</width>
       <height>91</height>
      </rect>
@@ -31,7 +31,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>120</y>
+      <y>100</y>
       <width>400</width>
       <height>400</height>
      </rect>
@@ -41,7 +41,7 @@
     <property name="geometry">
      <rect>
       <x>770</x>
-      <y>60</y>
+      <y>4</y>
       <width>301</width>
       <height>61</height>
      </rect>
@@ -63,7 +63,7 @@
     <property name="geometry">
      <rect>
       <x>770</x>
-      <y>480</y>
+      <y>424</y>
       <width>301</width>
       <height>31</height>
      </rect>
@@ -85,7 +85,7 @@
     <property name="geometry">
      <rect>
       <x>149</x>
-      <y>20</y>
+      <y>10</y>
       <width>400</width>
       <height>75</height>
      </rect>
@@ -98,7 +98,7 @@
     <property name="geometry">
      <rect>
       <x>770</x>
-      <y>120</y>
+      <y>64</y>
       <width>305</width>
       <height>355</height>
      </rect>
@@ -132,7 +132,7 @@
     <property name="geometry">
      <rect>
       <x>770</x>
-      <y>520</y>
+      <y>464</y>
       <width>305</width>
       <height>255</height>
      </rect>
@@ -161,7 +161,7 @@
     <property name="geometry">
      <rect>
       <x>400</x>
-      <y>570</y>
+      <y>540</y>
       <width>151</width>
       <height>91</height>
      </rect>
@@ -174,7 +174,7 @@
     <property name="geometry">
      <rect>
       <x>150</x>
-      <y>710</y>
+      <y>680</y>
       <width>401</width>
       <height>41</height>
      </rect>
@@ -189,8 +189,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1209</width>
-     <height>22</height>
+     <width>1280</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">

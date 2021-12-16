@@ -118,6 +118,12 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
             sleep(0.1)
             QCoreApplication.processEvents()
 
+    def unload_cent(self):
+        self.label.setText("Unloading Vials")
+
+    def close_window(self):
+        self.close()
+
 
 class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self, *args, **kwargs):
@@ -167,6 +173,9 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def open_progress(self):
         self.progress_window.show()
         self.progress_window.start_progress()
+
+    def unload_window(self):
+        self.progress_window.unload_cent()
 
     def toggle_select_vial(self, n):
         self.rack.vial_selected[n] = not self.rack.vial_selected[n]
@@ -275,7 +284,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperOpen()
         self.robot.Delay(0.5)
-        self.robot.MoveLin(-20, 0, 0, 0, 0, 0)
+        self.robot.MoveLin(-30, 0, 0, 0, 0, 0)
 
     def place_front(self, point):
         self.robot.SetTRF(30, 0, 17, -180, 0, -180)
@@ -298,7 +307,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def ret_pick_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
         self.robot.SetWRF(*point)
-        self.robot.MovePose(-20, 0, 0, 0, 0, 0)
+        self.robot.MovePose(-30, 0, 0, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperClose()
         self.Delay(0.5)
@@ -325,17 +334,37 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def start_centrifuge(self):
         self.open_progress()
+        sleep(2)
+        self.unload_window()
 
         ### Place back the vials ###
         for i, st in enumerate(self.rack.vial_selected):
             if st:
+
+                pick_point = self.centrifuge.rack_position[i]
+                if self.rack.rack_pick_dir[i]:
+                    self.ret_pick_reg(pick_point)
+                else:
+                    self.ret_pick_front(pick_point)
+
+                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+
+                place_point = self.rack.rack_position[i]
+                if self.rack.rack_pick_dir[i]:
+                    self.ret_place_reg(place_point)
+                else:
+                    self.ret_place_front(place_point)
+                
+                
                 self.RackSelection.button_list[i].setEnabled(True)
                 self.RackSelection.button_list[i].setChecked(False)
                 self.RackStatusDisplay.turn_vial_on(i)
                 self.rack.vial_selected[i] = False
                 self.CentStatusDisplay.toggle_led(i)
+                QCoreApplication.processEvents()
 
         self.centrifuge.cent_status = True
+        self.progress_window.close_window()
 
 
     def closeEvent(self, event):
