@@ -344,7 +344,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         
         for i, st in enumerate(self.rack.vial_selected):
             if st:
-
+                self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
                 pick_point = self.centrifuge.rack_position[i]
                 if self.rack.rack_pick_dir[i]:
                     self.ret_pick_reg(pick_point)
@@ -359,7 +359,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 else:
                     self.ret_place_front(place_point)
                 
-                
+                cp = self.robot.SetCheckpoint(42)
+                cp.wait()
                 self.RackSelection.button_list[i].setEnabled(True)
                 self.RackSelection.button_list[i].setChecked(False)
                 self.RackStatusDisplay.turn_vial_on(i)
