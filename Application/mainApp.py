@@ -134,7 +134,7 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
         self.setupUi(self)
         self.progressBar.setValue(0)
         self.label.setText("Starting the centrifuge")
-        self.move(500, 200)
+        self.move(346, 250)
         
 
     def start_progress(self):
@@ -304,7 +304,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperClose()
         self.robot.Delay(0.5)
-        self.robot.MoveLin(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 100, 0, 0, 0)
 
     def place_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
@@ -345,7 +345,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def ret_place_front(self, point):
         self.robot.SetTRF(30, 0, 17, -180, 0, -180)
         self.robot.SetWRF(*point)
-        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MovePose(0, 0, 100, 0, 0, 0)
         self.robot.MoveLin(0, 0, 0, 0, 0, 0)
         self.robot.GripperOpen()
         self.robot.Delay(0.5)
