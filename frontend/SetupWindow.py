@@ -157,7 +157,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Setup Window"))
         self.cent_pos_1.setPlaceholderText(_translate("MainWindow", "(x,y,z,rx,ry,rz)"))
         self.cent_pos_2.setPlaceholderText(_translate("MainWindow", "(x,y,z,rx,ry,rz)"))
         self.cent_pos_3.setPlaceholderText(_translate("MainWindow", "(x,y,z,rx,ry,rz)"))

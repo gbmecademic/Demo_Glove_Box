@@ -138,7 +138,8 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
         
 
     def start_progress(self):
-        sleep(1)
+        self.progressBar.setValue(0)
+        self.label.setText("Starting the centrifuge")
         QCoreApplication.processEvents()
         sleep(5)
         self.label.setText("Processing Samples")
@@ -149,6 +150,7 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
 
     def unload_cent(self):
         self.label.setText("Unloading Vials")
+        QCoreApplication.processEvents()
 
     def close_window(self):
         self.close()

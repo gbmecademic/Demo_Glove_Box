@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Setup Window</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLineEdit" name="cent_pos_1">
