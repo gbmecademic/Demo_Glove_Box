@@ -392,13 +392,13 @@
     <property name="geometry">
      <rect>
       <x>260</x>
-      <y>340</y>
+      <y>310</y>
       <width>231</width>
       <height>41</height>
      </rect>
     </property>
     <property name="text">
-     <string>Ok</string>
+     <string>Save positions</string>
     </property>
    </widget>
    <widget class="QComboBox" name="pick_dir_1">
@@ -538,6 +538,19 @@
       <string>Front</string>
      </property>
     </item>
+   </widget>
+   <widget class="QPushButton" name="pushButtonAllPosition">
+    <property name="geometry">
+     <rect>
+      <x>260</x>
+      <y>370</y>
+      <width>231</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Upload default positions</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

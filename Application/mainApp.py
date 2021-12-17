@@ -17,6 +17,21 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
         self.setupUi(self)
 
         self.pushButton.clicked.connect(self.save_position)
+        self.defaul_pick = [[57.7950,186.1550,80.7050,-0.0000,-0.0000,-90.0000],
+                            [25.9600,186.1550,80.7050,-0.0000,0.0000,-90.0000], 
+                            [-6.2800,186.1550,80.7050,-0.0000,0.0000,-90.0000], 
+                            [58.4135,236.8031,81.7342,0.0000,-0.1620,90.0000], 
+                            [26.9986,238.5881,81.6454,-0.0000,-0.1620,90.0000], 
+                            [-4.9963,237.1381,81.5549,-0.0000,-0.1620,90.0000]]
+        self.defaul_place = [[256.7045,21.9299,87.1742,46.7246,-20.3339,71.8831],
+                            [278.0817,-13.5350,87.2791,0.0000,-50.0000,0.0000],
+                            [258.6920,-48.0219,86.2246,-44.8992,-24.8455,-67.5270],
+                            [217.0611,-48.6621,84.6120,-44.2944,22.9473,66.5995],
+                            [196.4375,-14.0050,84.0717,-1.0921,49.9949,0.8365],
+                            [217.4994,22.6281,84.6470,45.5804,23.3668,-67.3643]]
+
+        self.pushButtonAllPosition.clicked.connect(self._save_defaults)
+
 
     def save_position(self):
         if self.cent_pos_1.text():
@@ -93,6 +108,14 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
             pick_dir = self.pick_dir_6.currentText()
             self.rack.rack_pick_dir[5] = True if pick_dir == 'Regular' else False
 
+    
+    def _save_defaults(self):
+        for i, pos in enumerate(self.defaul_pick):
+            self.rack.update_position(i, pos)
+        
+        for i, pos in enumerate(self.defaul_place):
+            self.centrifuge.update_position(i, pos)
+
 
     def _text_to_list(self, text):
         text = re.sub('[()]', '', text)
@@ -107,9 +130,11 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
         self.setupUi(self)
         self.progressBar.setValue(0)
         self.label.setText("Starting the centrifuge")
+        self.move(500, 200)
         
 
     def start_progress(self):
+        sleep(1)
         QCoreApplication.processEvents()
         sleep(5)
         self.label.setText("Processing Samples")

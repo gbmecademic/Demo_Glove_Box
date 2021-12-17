@@ -108,7 +108,7 @@ class Ui_MainWindow(object):
         self.label_14.setStyleSheet("background-color: transparent")
         self.label_14.setObjectName("label_14")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.pushButton.setGeometry(QtCore.QRect(260, 340, 231, 41))
+        self.pushButton.setGeometry(QtCore.QRect(260, 310, 231, 41))
         self.pushButton.setObjectName("pushButton")
         self.pick_dir_1 = QtWidgets.QComboBox(self.centralwidget)
         self.pick_dir_1.setGeometry(QtCore.QRect(300, 60, 69, 21))
@@ -140,6 +140,9 @@ class Ui_MainWindow(object):
         self.pick_dir_6.setObjectName("pick_dir_6")
         self.pick_dir_6.addItem("")
         self.pick_dir_6.addItem("")
+        self.pushButtonAllPosition = QtWidgets.QPushButton(self.centralwidget)
+        self.pushButtonAllPosition.setGeometry(QtCore.QRect(260, 370, 231, 41))
+        self.pushButtonAllPosition.setObjectName("pushButtonAllPosition")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 21))
@@ -181,7 +184,7 @@ class Ui_MainWindow(object):
         self.label_12.setText(_translate("MainWindow", "4"))
         self.label_13.setText(_translate("MainWindow", "5"))
         self.label_14.setText(_translate("MainWindow", "6"))
-        self.pushButton.setText(_translate("MainWindow", "Ok"))
+        self.pushButton.setText(_translate("MainWindow", "Save positions"))
         self.pick_dir_1.setCurrentText(_translate("MainWindow", "Regular"))
         self.pick_dir_1.setItemText(0, _translate("MainWindow", "Regular"))
         self.pick_dir_1.setItemText(1, _translate("MainWindow", "Front"))
@@ -200,3 +203,14 @@ class Ui_MainWindow(object):
         self.pick_dir_6.setCurrentText(_translate("MainWindow", "Regular"))
         self.pick_dir_6.setItemText(0, _translate("MainWindow", "Regular"))
         self.pick_dir_6.setItemText(1, _translate("MainWindow", "Front"))
+        self.pushButtonAllPosition.setText(_translate("MainWindow", "Upload default positions"))
+
+
+if __name__ == "__main__":
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())
