@@ -116,7 +116,9 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
         for i, pos in enumerate(self.defaul_place):
             self.centrifuge.update_position(i, pos)
 
-        self.rack.rack_pick_dir[0:3] = False
+        self.rack.rack_pick_dir[0] = False
+        self.rack.rack_pick_dir[1] = False
+        self.rack.rack_pick_dir[2] = False
 
 
     def _text_to_list(self, text):
