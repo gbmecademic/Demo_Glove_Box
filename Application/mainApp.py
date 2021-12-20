@@ -287,6 +287,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
                 QCoreApplication.processEvents()
 
+        self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+
 
     def pick_reg(self, point):
         self.robot.SetTRF(49, 0, 14, 0, -90, 0)
@@ -369,8 +371,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.unload_window()
 
         ### Place back the vials ###
-        self.robot.SetJointVel(10)
-        self.robot.SetCartLinVel(10)
+        self.robot.SetJointVel(25)
+        self.robot.SetCartLinVel(25)
         self.robot.GripperOpen()
         
         for i, st in enumerate(self.rack.vial_selected):
@@ -399,6 +401,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
                 QCoreApplication.processEvents()
 
+        self.robot.MoveJoints(90, 0, 0, 0, 0, 0)
         self.centrifuge.cent_status = True
         self.progress_window.close_window()
 
