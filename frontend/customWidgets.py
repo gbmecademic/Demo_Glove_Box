@@ -113,3 +113,11 @@ class RackButtons(QWidget):
             self.grid.addWidget(self.button_list[i], *positions[i])
         self.setLayout(self.grid)
 
+    def disableButtons(self):
+        for b in self.button_list:
+            b.setEnabled(False)
+
+    def enableButtons(self):
+        for b in self.button_list:
+            b.setEnabled(True)
+

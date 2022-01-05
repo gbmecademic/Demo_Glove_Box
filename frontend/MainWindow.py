@@ -70,6 +70,9 @@ class Ui_MainWindow(object):
         self.buttonRobot = QtWidgets.QPushButton(self.centralwidget)
         self.buttonRobot.setGeometry(QtCore.QRect(150, 650, 401, 41))
         self.buttonRobot.setObjectName("buttonRobot")
+        self.buttonAutoMode = QtWidgets.QPushButton(self.centralwidget)
+        self.buttonAutoMode.setGeometry(QtCore.QRect(590, 520, 151, 91))
+        self.buttonAutoMode.setObjectName("buttonAutoMode")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1280, 21))
@@ -96,6 +99,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Select which vial to load"))
         self.buttonCentrifuge.setText(_translate("MainWindow", "Start Centrifuge"))
         self.buttonRobot.setText(_translate("MainWindow", "Robot Connection"))
+        self.buttonAutoMode.setText(_translate("MainWindow", "AutoMode"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionSetup.setText(_translate("MainWindow", "Setup"))
 from frontend.customWidgets import CentStatus, RackButtons, RackStatus

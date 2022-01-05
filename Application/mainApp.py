@@ -1,5 +1,5 @@
 from PyQt5 import QtWidgets
-from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap
 from backend.backend import MainRack, Centrifuge
 from frontend import customWidgets, MainWindow, SetupWindow, ProgressWindow
@@ -170,11 +170,14 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         pixmap_logo = QPixmap(os.path.join(parent_dir, 'frontend/images/mecademic-logo.png'))
         pixmap_logo = pixmap_logo.scaledToWidth(400)
         self.logo.setPixmap(pixmap_logo)
+        self.buttonAutoMode.setCheckable(True)
 
         ### Backend setup ###
         self.robot = Robot()
         self.rack = MainRack(6)
         self.centrifuge = Centrifuge(6)
+        self.autoThread = None
+        self.autoWorker = None
 
         ### Setup Window Setup ###
         self.setup_window = SetupWindow(self.rack, self.centrifuge)
@@ -196,6 +199,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         self.buttonCentrifuge.clicked.connect(self.start_centrifuge)
         self.buttonRobot.clicked.connect(self.connect_to_robot)
+        self.buttonAutoMode.clicked.connect(self.buttonAutoFunction)
 
 
     def open_setup(self):
@@ -406,6 +410,32 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.progress_window.close_window()
 
 
+    def startAutoMode(self):
+        self.RackSelection.disableButtons()
+        self.buttonRobot.setEnabled(False)
+        self.buttonCentrifuge.setEnabled(False)
+        self.LoadButton.setEnabled(False)
+        self.autoThread = QThread()
+        self.autoWorker = AutoModeWorker(self.robot, self.rack, self.centrifuge)
+        self.autoWorker.moveToThread(self.autoThread)
+        self.autoThread.started.connect(self.autoWorker.run)
+        self.autoWorker.finished.connect(self.autoThread.quit)
+        self.autoWorker.finished.connect(self.autoWorker.deleteLater)
+        self.autoWorker.finished.connect(self.RackSelection.enableButtons)
+        self.autoWorker.finished.connect(lambda: self.buttonRobot.setEnabled(True))
+        self.autoWorker.finished.connect(lambda: self.buttonCentrifuge.setEnabled(True))
+        self.autoWorker.finished.connect(lambda: self.LoadButton.setEnabled(True))
+        self.autoThread.finished.connect(self.autoThread.deleteLater)
+
+        self.autoThread.start()
+
+    def buttonAutoFunction(self):
+        if self.buttonAutoMode.isChecked():
+            self.startAutoMode()
+        else:
+            self.autoWorker.toggleFinish()
+
+
     def closeEvent(self, event):
         self.robot.Disconnect()
         super().closeEvent(event)
@@ -414,3 +444,131 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     ### Test functions ###
     def print_data(self):
         print(self.centrifuge.rack_position[0])
+
+
+class AutoModeWorker(QObject):
+    finished = pyqtSignal()
+
+    def __init__(self, robot, rack, cent):
+        super().__init__()
+        self.robot = robot
+        self.rack = rack
+        self.cent = cent
+
+
+    def run(self):
+        self.goFlag = True
+        self.robot.SetJointVel(20)
+        self.robot.SetCartLinVel(25)
+        print("Running Thread")
+        while(self.goFlag):
+            for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
+                # Pick from the rack
+                if pick_dir:
+                    self.pick_reg(rack_pos)
+                else:
+                    self.pick_front(rack_pos)
+
+                # Drop in the centrifuge
+                if pick_dir:
+                    self.place_reg(cent_pos)
+                else:
+                    self.place_front(cent_pos)
+
+            # Wait a bit
+            self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+
+            for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
+                # Pick from centrifuge
+                if pick_dir:
+                    self.ret_pick_reg(cent_pos)
+                else:
+                    self.ret_pick_front(cent_pos)
+                # Place back in rack
+                if pick_dir:
+                    self.ret_place_reg(rack_pos)
+                else:
+                    self.ret_place_front(rack_pos)
+
+        self.finished.emit()
+        print("Ending Thread")
+
+
+    def toggleFinish(self):
+        self.goFlag = False
+
+
+    def pick_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(-16, 0, 30, 0, 0, 0)
+        self.robot.MovePose(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+        self.robot.GripperClose()
+        self.robot.Delay(1)
+        self.robot.MoveLin(0, 0, 120, 0, 0, 0)
+
+
+    def pick_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 20, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 100, 0, 0, 0)
+
+    def place_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(-30, 0, 0, 0, 0, 0)
+
+    def place_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0 ,0)
+
+    def ret_pick_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 80, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0 ,0)
+
+    def ret_pick_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(-30, 0, 0, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 80, 0, 0, 0)
+
+    def ret_place_front(self, point):
+        self.robot.SetTRF(30, 0, 17, -180, 0, -180)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 100, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 20, 0, 0, 0)
+
+    def ret_place_reg(self, point):
+        self.robot.SetTRF(49, 0, 14, 0, -90, 0)
+        self.robot.SetWRF(*point)
+        self.robot.MovePose(0, 0, 120, 0, 0, 0)
+        self.robot.MoveLin(0, 0, 0, 0, 0, 0)        # Pick
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
+        self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
