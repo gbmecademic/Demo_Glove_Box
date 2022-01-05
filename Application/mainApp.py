@@ -460,7 +460,6 @@ class AutoModeWorker(QObject):
         self.goFlag = True
         self.robot.SetJointVel(20)
         self.robot.SetCartLinVel(25)
-        print("Running Thread")
         while(self.goFlag):
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
                 # Pick from the rack
@@ -476,7 +475,12 @@ class AutoModeWorker(QObject):
                     self.place_front(cent_pos)
 
             # Wait a bit
+            cp = self.robot.SetCheckpoint(82)
+            cp.wait()
             self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+            cp = self.robot.SetCheckpoint(82)
+            cp.wait()
+            sleep(3)
 
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
                 # Pick from centrifuge
@@ -489,9 +493,12 @@ class AutoModeWorker(QObject):
                     self.ret_place_reg(rack_pos)
                 else:
                     self.ret_place_front(rack_pos)
+            
+            cp = self.robot.SetCheckpoint(82)
+            cp.wait()
+            self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
 
         self.finished.emit()
-        print("Ending Thread")
 
 
     def toggleFinish(self):
