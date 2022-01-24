@@ -266,6 +266,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         for i, st in enumerate(self.rack.vial_selected):
             if st:
+                self.robot.MoveJoints(90, 0, 0, 0, 0, 0)
                 self.RackStatusDisplay.turn_vial_off(i)
                 # Picking
                 pick_point = self.rack.rack_position[i]
@@ -395,7 +396,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                     self.ret_place_reg(place_point)
                 else:
                     self.ret_place_front(place_point)
-                
+
                 cp = self.robot.SetCheckpoint(42)
                 cp.wait()
                 self.RackSelection.button_list[i].setEnabled(True)
@@ -463,10 +464,13 @@ class AutoModeWorker(QObject):
         while(self.goFlag):
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
                 # Pick from the rack
+                self.robot.MoveJoints(90, 0, 0, 0, 0, 0)
                 if pick_dir:
                     self.pick_reg(rack_pos)
                 else:
                     self.pick_front(rack_pos)
+
+                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
 
                 # Drop in the centrifuge
                 if pick_dir:
@@ -484,15 +488,19 @@ class AutoModeWorker(QObject):
 
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
                 # Pick from centrifuge
+                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
                 if pick_dir:
                     self.ret_pick_reg(cent_pos)
                 else:
                     self.ret_pick_front(cent_pos)
                 # Place back in rack
+                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+
                 if pick_dir:
                     self.ret_place_reg(rack_pos)
                 else:
                     self.ret_place_front(rack_pos)
+                
             
             cp = self.robot.SetCheckpoint(82)
             cp.wait()
