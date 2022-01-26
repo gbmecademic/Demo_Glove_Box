@@ -171,6 +171,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         pixmap_logo = pixmap_logo.scaledToWidth(400)
         self.logo.setPixmap(pixmap_logo)
         self.buttonAutoMode.setCheckable(True)
+        self.buttonCentrifuge.setEnabled(False)
 
         ### Backend setup ###
         self.robot = Robot()
@@ -259,6 +260,15 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
             msgbox.exec()
             return
+        
+        # Disable all buttons during loading
+        self.LoadButton.setEnabled(False)
+        self.buttonAutoMode.setEnabled(False)
+        self.buttonCentrifuge.setEnabled(False)
+        self.buttonRobot.setEnabled(False)
+        self.RackSelection.disableButtons()
+        QCoreApplication.processEvents()
+
         # Load them in the centrifuge
         self.robot.SetJointVel(15)
         self.robot.SetCartLinVel(30)
@@ -293,6 +303,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 QCoreApplication.processEvents()
 
         self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+        self.buttonCentrifuge.setEnabled(True)
 
 
     def pick_reg(self, point):
@@ -371,6 +382,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
 
     def start_centrifuge(self):
+        self.buttonCentrifuge.setEnabled(False)
         self.open_progress()
         sleep(2)
         self.unload_window()
@@ -409,6 +421,10 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveJoints(90, 0, 0, 0, 0, 0)
         self.centrifuge.cent_status = True
         self.progress_window.close_window()
+        self.buttonAutoMode.setEnabled(True)
+        self.buttonRobot.setEnabled(True)
+        self.LoadButton.setEnabled(True)
+        self.RackSelection.enableButtons()
 
 
     def startAutoMode(self):
