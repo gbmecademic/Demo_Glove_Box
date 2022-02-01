@@ -270,7 +270,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         QCoreApplication.processEvents()
 
         # Load them in the centrifuge
-        self.robot.SetJointVel(15)
+        self.robot.SetJointVel(40)
         self.robot.SetCartLinVel(30)
         self.robot.GripperOpen()
 
@@ -388,7 +388,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.unload_window()
 
         ### Place back the vials ###
-        self.robot.SetJointVel(25)
+        self.robot.SetJointVel(40)
         self.robot.SetCartLinVel(25)
         self.robot.GripperOpen()
         
@@ -475,7 +475,7 @@ class AutoModeWorker(QObject):
 
     def run(self):
         self.goFlag = True
-        self.robot.SetJointVel(20)
+        self.robot.SetJointVel(40)
         self.robot.SetCartLinVel(25)
         while(self.goFlag):
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
