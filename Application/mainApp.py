@@ -175,6 +175,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         ### Backend setup ###
         self.robot = Robot()
+        self.robot2 = Robot()
         self.rack = MainRack(6)
         self.centrifuge = Centrifuge(6)
         self.autoThread = None
@@ -380,6 +381,30 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.Delay(0.5)
         self.robot.MoveLin(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
         self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
+
+    def move_to_intermediate_reg(self):
+        # Move to the intermediate point
+        pass
+
+    def move_to_intermediate_front(self):
+        # Move to the intermediate point after a front pick
+        pass
+
+    def pick_intermediate(self):
+        # Robot2 picks the vial from the intermediate point
+        pass
+
+    def scan_vial(self):
+        # Pick the vial from the indermediate rack
+        # Move in front of the cammera
+        # While loop:
+            # Take a picture
+            # if there is a barcode or the robot has done a full 360
+                # display barcode
+                # break
+            # else
+                # move 15 degrees
+        pass
 
     def start_centrifuge(self):
         self.buttonCentrifuge.setEnabled(False)

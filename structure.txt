@@ -49,3 +49,17 @@ Robot object:
     mecademicpy.robot.Robot object to control the robot
     This one already exist but will be inside the App.
 
+
+Changes for the ATX version:
+    Need to add a second robot to the demo.
+    There are a few options:
+        - The second robot can shake the vials. That's a bit boring.
+        - The second robot can scan the vials. Will need to do some work with a camera or scanner.
+        - The second robot could manipulate a camera. Not too sure what would be the point.
+
+    I tested barcode reading, it works with a webcam and the pyzbar library although it is a bit touchy to get right.
+    Need to create a setup window for the camera because depending on the lighting conditions we will need to change the threshold.
+        That setup window needs to have a robot pick up the vial and show it to the camera.
+        There needs to be a button to rotate the vial in front of the camera.
+        There needs to be a slider to set the threshold.
+        There needs to be a button to save the threshold and quit.

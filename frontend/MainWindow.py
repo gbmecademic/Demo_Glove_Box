@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'frontend\MainWindow.ui'
+# Form implementation generated from reading ui file 'frontend/MainWindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -75,7 +75,7 @@ class Ui_MainWindow(object):
         self.buttonAutoMode.setObjectName("buttonAutoMode")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1280, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1280, 22))
         self.menubar.setObjectName("menubar")
         self.menuOptions = QtWidgets.QMenu(self.menubar)
         self.menuOptions.setObjectName("menuOptions")
@@ -85,7 +85,10 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionSetup = QtWidgets.QAction(MainWindow)
         self.actionSetup.setObjectName("actionSetup")
+        self.actionCamera = QtWidgets.QAction(MainWindow)
+        self.actionCamera.setObjectName("actionCamera")
         self.menuOptions.addAction(self.actionSetup)
+        self.menuOptions.addAction(self.actionCamera)
         self.menubar.addAction(self.menuOptions.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -102,6 +105,7 @@ class Ui_MainWindow(object):
         self.buttonAutoMode.setText(_translate("MainWindow", "AutoMode"))
         self.menuOptions.setTitle(_translate("MainWindow", "Options"))
         self.actionSetup.setText(_translate("MainWindow", "Setup"))
+        self.actionCamera.setText(_translate("MainWindow", "Camera"))
 from frontend.customWidgets import CentStatus, RackButtons, RackStatus
 
 

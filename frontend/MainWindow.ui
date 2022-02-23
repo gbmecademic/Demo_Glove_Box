@@ -203,7 +203,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuOptions">
@@ -211,6 +211,7 @@
      <string>Options</string>
     </property>
     <addaction name="actionSetup"/>
+    <addaction name="actionCamera"/>
    </widget>
    <addaction name="menuOptions"/>
   </widget>
@@ -218,6 +219,11 @@
   <action name="actionSetup">
    <property name="text">
     <string>Setup</string>
+   </property>
+  </action>
+  <action name="actionCamera">
+   <property name="text">
+    <string>Camera</string>
    </property>
   </action>
  </widget>
