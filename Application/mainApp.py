@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QCoreApplication, QObject, QThread, pyqtSignal
 from PyQt5.QtGui import QPixmap
-from backend.backend import MainRack, Centrifuge
+from backend.backend import MainRack, Centrifuge, Camera
 from frontend import customWidgets, MainWindow, SetupWindow, ProgressWindow
 from mecademicpy.robot import CommunicationError, Robot
 import os
@@ -155,6 +155,9 @@ class ProgressWindowApp(QtWidgets.QMainWindow, ProgressWindow.Ui_MainWindow):
     def close_window(self):
         self.close()
 
+    def display_barcode(self):
+        pass
+
 
 class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self, *args, **kwargs):
@@ -180,6 +183,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.centrifuge = Centrifuge(6)
         self.autoThread = None
         self.autoWorker = None
+        self.camera = Camera()
 
         ### Setup Window Setup ###
         self.setup_window = SetupWindow(self.rack, self.centrifuge)
@@ -491,11 +495,12 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 class AutoModeWorker(QObject):
     finished = pyqtSignal()
 
-    def __init__(self, robot, rack, cent):
+    def __init__(self, robot, rack, cent, camera):
         super().__init__()
         self.robot = robot
         self.rack = rack
         self.cent = cent
+        self.camera = camera
 
 
     def run(self):

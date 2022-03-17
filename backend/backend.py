@@ -1,6 +1,7 @@
 from mecademicpy.robot import Robot
 from scipy.spatial.transform import Rotation
 import numpy as np
+import socket
 
 
 class MainRack():
@@ -41,3 +42,40 @@ def projectvector(mov_vect, rot_vect):
     rot_mat = Rotation.from_euler('ZYX', rot_vect)
     rot_mat_num = rot_mat.as_matrix().transpose()
     return np.dot(rot_mat_num, mov_vect)
+
+
+class Camera():
+    def __init__(self) -> None:
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._barcode = ""
+        self.valid_barcode = False
+
+    def connect(self) -> None:
+        self._socket.connect(('192.168.0.102', 5024))
+
+    def _send(self, msg: str) -> None:
+        msg_enc = msg+'\r'
+        msg_enc = msg_enc.encode('ascii')
+        self._socket.sendall(msg_enc)
+
+    def take_picture(self, msg = "Trig") -> None:
+        self._send(msg)
+
+    def _recv(self) -> str:
+        raw = self._socket.recv(1024)
+        decoded = raw.decode('ascii')
+        return decoded
+
+    def check_barcode(self) -> None:
+        self._barcode = self._recv()
+        if len(self._barcode) == 13:
+            self.valid_barcode = True
+
+
+
+
+
+
+
+
+
