@@ -184,6 +184,8 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.autoThread = None
         self.autoWorker = None
         self.camera = Camera()
+        self.inter_pos_r1 = [110.875, -162.69, 87.64, 0, 0, 0]
+        self.inter_pos_r2 = [-18, -119.5, 387.55, 0, 0, 0]
 
         ### Setup Window Setup ###
         self.setup_window = SetupWindow(self.rack, self.centrifuge)
@@ -205,7 +207,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         self.buttonCentrifuge.clicked.connect(self.start_centrifuge)
         self.buttonRobot.clicked.connect(self.connect_to_robot)
-        self.buttonAutoMode.clicked.connect(self.buttonAutoFunction)
+        self.buttonAutoMode.clicked.connect(self.print_data)
 
 
     def open_setup(self):
@@ -222,16 +224,24 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.rack.vial_selected[n] = not self.rack.vial_selected[n]
 
     def connect_to_robot(self):
-        if not self.robot.IsConnected():
+        if (not self.robot.IsConnected()) and (not self.robot2.IsConnected()):
             try:
                 self.robot.Connect()
+                self.robot2.Connect('192.168.0.101')
                 self.robot.ActivateAndHome()
                 self.robot.WaitHomed()
+                self.robot2.ActivateAndHome()
+                self.robot2.WaitHomed()
+                self.camera.connect()
                 self.buttonRobot.setStyleSheet("background-color:rgba(0,255,0,255)")
             except CommunicationError as e:
                 print(e)
+                self.robot.Disconnect()
+                self.robot2.Disconnect()
         else:
             self.robot.Disconnect()
+            self.robot2.Disconnect()
+            self.camera.disconnect()
             self.buttonRobot.setStyleSheet("background-color:rgba(0,0,0,125)")
 
     def load_centrifuge(self):
@@ -386,17 +396,64 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot.MoveLin(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
         self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
 
-    def move_to_intermediate_reg(self):
-        # Move to the intermediate point
-        pass
+    def drop_1_inter_reg(self):
+        # Drop to the intermediate point
+        self.robot.SetTRF(49,0,14,0,-90,0)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0,0,50,0,0,-90)
+        self.robot.MoveLin(0,0,0,0,0,-90)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0,20,0, 0, 0, -90)
 
-    def move_to_intermediate_front(self):
-        # Move to the intermediate point after a front pick
-        pass
+    def drop_1_inter_front(self):
+        # Drop to the intermediate point after a front pick
+        self.robot.SetTRF(30,0,17,-180,0,-180)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0, 0, 52, 0, 0, 90)
+        self.robot.MoveLin(0, 0, 2, 0, 0, 90)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 30, 0, 0, 90)
 
-    def pick_intermediate(self):
+    def pick_1_inter_reg(self):
+        # Pick back from inter ref pick
+        self.robot.SetTRF(49,0,14,0,-90,0)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0,20,0, 0, 0, -90)
+        self.robot.MoveLin(0,0,0,0,0,-90)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0,0,50,0,0,-90)
+
+    def pick_1_inter_front(self):
+        # Pick back from inter front pick
+        self.robot.SetTRF(30,0,17,-180,0,-180)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0, 0, 30, 0, 0, 90)
+        self.robot.MoveLin(0, 0, 2, 0, 0, 90)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 52, 0, 0, 90)
+
+    def pick_2_intermediate(self):
         # Robot2 picks the vial from the intermediate point
-        pass
+        self.robot2.SetWRF(*self.inter_pos_r2)
+        self.robot2.MovePose(0,20,0,0,0,90)
+        self.robot2.MoveLin(0,0,0,0,0,90)
+        self.robot2.GripperClose()
+        self.robot2.Delay(0.5)
+        self.robot2.MoveLin(0,0,-50,0,0,90)
+        self.robot2.MoveLin(-30,0,-50,0,0,180)
+
+    def place_2_intermediate(self):
+        self.robot2.SetWRF(*self.inter_pos_r2)
+        self.robot2.MovePose(-30,0,-50,0,0,90)
+        self.robot2.MovePose(0,0,-50,0,0,90)
+        self.robot2.MoveLin(0,0,0,0,0,90)
+        self.robot2.GripperOpen()
+        self.robot2.Delay(0.5)
+        self.robot2.MoveLin(0,20,0,0,0,90)
 
     def scan_vial(self):
         # Pick the vial from the indermediate rack
@@ -408,7 +465,23 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 # break
             # else
                 # move 15 degrees
-        pass
+        self.robot2.MoveJoints(-121.797, 7.733, -4.691, 0, -93.042, 191.797)
+        cp = self.robot2.SetCheckpoint(42)
+        cp.wait()
+        mv_cnt = 0
+        while True:
+            self.camera.take_picture()
+            self.camera.check_barcode()
+            if self.camera.valid_barcode:
+                break
+            else:
+                mv_cnt += 1
+                if mv_cnt >= 8:
+                    break
+                self.robot2.MoveJointsRel(0,0,0,0,0,-45)
+                cp2 = self.robot2.SetCheckpoint(42)
+                cp2.wait()
+
 
     def start_centrifuge(self):
         self.buttonCentrifuge.setEnabled(False)
@@ -484,12 +557,46 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
     def closeEvent(self, event):
         self.robot.Disconnect()
+        self.robot2.Disconnect()
+        self.camera.disconnect()
         super().closeEvent(event)
 
 
     ### Test functions ###
     def print_data(self):
-        print(self.centrifuge.rack_position[0])
+        # Setup r1
+        self.robot.GripperClose()
+        self.robot.SetJointVel(30)
+        self.robot.SetCartLinVel(25)
+        self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+        cp1 = self.robot.SetCheckpoint(42)
+        cp1.wait()
+        # Setup r2
+        self.robot2.GripperOpen()
+        self.robot2.SetJointVel(30)
+        self.robot2.SetCartLinVel(25)
+        self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+        cp2 = self.robot2.SetCheckpoint(42)
+        cp2.wait()
+        # r1 drop reg
+        self.drop_1_inter_reg()
+        self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+        cp1 = self.robot.SetCheckpoint(42)
+        cp1.wait()
+        # r2 pick
+        self.pick_2_intermediate()
+        self.scan_vial()
+        self.place_2_intermediate()
+        self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+        cp2 = self.robot2.SetCheckpoint(42)
+        cp2.wait()
+        # R1 pick back
+        self.pick_1_inter_reg()
+        self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+        cp1 = self.robot.SetCheckpoint(42)
+        cp1.wait()
+
+
 
 
 class AutoModeWorker(QObject):

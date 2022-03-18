@@ -46,12 +46,16 @@ def projectvector(mov_vect, rot_vect):
 
 class Camera():
     def __init__(self) -> None:
-        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._socket = None
         self._barcode = ""
         self.valid_barcode = False
 
     def connect(self) -> None:
+        self._socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._socket.connect(('192.168.0.102', 5024))
+
+    def disconnect(self) -> None:
+        self._socket.close()
 
     def _send(self, msg: str) -> None:
         msg_enc = msg+'\r'
@@ -68,7 +72,7 @@ class Camera():
 
     def check_barcode(self) -> None:
         self._barcode = self._recv()
-        if len(self._barcode) == 13:
+        if len(self._barcode) == 14:
             self.valid_barcode = True
 
 
