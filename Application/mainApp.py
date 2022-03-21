@@ -285,9 +285,15 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         QCoreApplication.processEvents()
 
         # Load them in the centrifuge
-        self.robot.SetJointVel(40)
+        self.robot.SetJointVel(10)
         self.robot.SetCartLinVel(30)
         self.robot.GripperOpen()
+        self.robot2.SetJointVel(10)
+        self.robot2.SetCartLinVel(30)
+        self.robot2.GripperOpen()
+        self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+        cp2 = self.robot2.SetCheckpoint(42)
+        cp2.wait()
 
         for i, st in enumerate(self.rack.vial_selected):
             if st:
@@ -300,7 +306,33 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 else:
                     self.pick_front(pick_point)
 
-                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+
+                # Drop the vial to the intermediate point
+                if self.rack.rack_pick_dir[i]:
+                    self.drop_1_inter_reg()
+                else:
+                    self.drop_1_inter_front()
+                
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+                cp1 = self.robot.SetCheckpoint(42)
+                cp1.wait()
+
+                # Pick it with robot2 and scan
+                self.pick_2_intermediate()
+                self.scan_vial()
+                self.place_2_intermediate()
+                self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+                cp2 = self.robot2.SetCheckpoint(42)
+                cp2.wait()
+
+                # Pick back with robot1
+                if self.rack.rack_pick_dir[i]:
+                    self.pick_1_inter_reg()
+                else:
+                    self.pick_1_inter_front()
+
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
 
                 place_point = self.centrifuge.rack_position[i]
                 if self.rack.rack_pick_dir[i]:
@@ -456,15 +488,6 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.robot2.MoveLin(0,20,0,0,0,90)
 
     def scan_vial(self):
-        # Pick the vial from the indermediate rack
-        # Move in front of the cammera
-        # While loop:
-            # Take a picture
-            # if there is a barcode or the robot has done a full 360
-                # display barcode
-                # break
-            # else
-                # move 15 degrees
         self.robot2.MoveJoints(-121.797, 7.733, -4.691, 0, -93.042, 191.797)
         cp = self.robot2.SetCheckpoint(42)
         cp.wait()
@@ -535,7 +558,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         self.buttonCentrifuge.setEnabled(False)
         self.LoadButton.setEnabled(False)
         self.autoThread = QThread()
-        self.autoWorker = AutoModeWorker(self.robot, self.rack, self.centrifuge)
+        self.autoWorker = AutoModeWorker(self.robot, self.rack, self.centrifuge, self.camera, self.robot2)
         self.autoWorker.moveToThread(self.autoThread)
         self.autoThread.started.connect(self.autoWorker.run)
         self.autoWorker.finished.connect(self.autoThread.quit)
@@ -602,9 +625,10 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 class AutoModeWorker(QObject):
     finished = pyqtSignal()
 
-    def __init__(self, robot, rack, cent, camera):
+    def __init__(self, robot, rack, cent, camera, robot2):
         super().__init__()
         self.robot = robot
+        self.robot2 = robot2
         self.rack = rack
         self.cent = cent
         self.camera = camera
@@ -623,7 +647,32 @@ class AutoModeWorker(QObject):
                 else:
                     self.pick_front(rack_pos)
 
-                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+
+                # Drop to the intermediate point
+                if pick_dir:
+                    self.drop_1_inter_reg()
+                else:
+                    self.drop_1_inter_front()
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
+                cp1 = self.robot.SetCheckpoint(42)
+                cp1.wait()
+
+                # scan the vials
+                self.pick_2_intermediate()
+                self.scan_vial()
+                self.place_2_intermediate()
+                self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+                cp2 = self.robot2.SetCheckpoint(42)
+                cp2.wait()
+
+                # Pick back the vials
+                if pick_dir:
+                    self.pick_1_inter_reg()
+                else:
+                    self.pick_1_inter_front()
+
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
 
                 # Drop in the centrifuge
                 if pick_dir:
@@ -740,3 +789,80 @@ class AutoModeWorker(QObject):
         self.robot.Delay(0.5)
         self.robot.MoveLin(-16, 0, 0, 0, 0, 0)      # Approach, modify this depending on the orientation
         self.robot.MoveLin(-16, 0, 30, 0, 0, 0)
+
+    def drop_1_inter_reg(self):
+        # Drop to the intermediate point
+        self.robot.SetTRF(49,0,14,0,-90,0)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0,0,50,0,0,-90)
+        self.robot.MoveLin(0,0,0,0,0,-90)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0,20,0, 0, 0, -90)
+
+    def drop_1_inter_front(self):
+        # Drop to the intermediate point after a front pick
+        self.robot.SetTRF(30,0,17,-180,0,-180)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0, 0, 52, 0, 0, 90)
+        self.robot.MoveLin(0, 0, 2, 0, 0, 90)
+        self.robot.GripperOpen()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 30, 0, 0, 90)
+
+    def pick_1_inter_reg(self):
+        # Pick back from inter ref pick
+        self.robot.SetTRF(49,0,14,0,-90,0)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0,20,0, 0, 0, -90)
+        self.robot.MoveLin(0,0,0,0,0,-90)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0,0,50,0,0,-90)
+
+    def pick_1_inter_front(self):
+        # Pick back from inter front pick
+        self.robot.SetTRF(30,0,17,-180,0,-180)
+        self.robot.SetWRF(*self.inter_pos_r1)
+        self.robot.MovePose(0, 0, 30, 0, 0, 90)
+        self.robot.MoveLin(0, 0, 2, 0, 0, 90)
+        self.robot.GripperClose()
+        self.robot.Delay(0.5)
+        self.robot.MoveLin(0, 0, 52, 0, 0, 90)
+
+    def pick_2_intermediate(self):
+        # Robot2 picks the vial from the intermediate point
+        self.robot2.SetWRF(*self.inter_pos_r2)
+        self.robot2.MovePose(0,20,0,0,0,90)
+        self.robot2.MoveLin(0,0,0,0,0,90)
+        self.robot2.GripperClose()
+        self.robot2.Delay(0.5)
+        self.robot2.MoveLin(0,0,-50,0,0,90)
+        self.robot2.MoveLin(-30,0,-50,0,0,180)
+
+    def place_2_intermediate(self):
+        self.robot2.SetWRF(*self.inter_pos_r2)
+        self.robot2.MovePose(-30,0,-50,0,0,90)
+        self.robot2.MovePose(0,0,-50,0,0,90)
+        self.robot2.MoveLin(0,0,0,0,0,90)
+        self.robot2.GripperOpen()
+        self.robot2.Delay(0.5)
+        self.robot2.MoveLin(0,20,0,0,0,90)
+
+    def scan_vial(self):
+        self.robot2.MoveJoints(-121.797, 7.733, -4.691, 0, -93.042, 191.797)
+        cp = self.robot2.SetCheckpoint(42)
+        cp.wait()
+        mv_cnt = 0
+        while True:
+            self.camera.take_picture()
+            self.camera.check_barcode()
+            if self.camera.valid_barcode:
+                break
+            else:
+                mv_cnt += 1
+                if mv_cnt >= 8:
+                    break
+                self.robot2.MoveJointsRel(0,0,0,0,0,-45)
+                cp2 = self.robot2.SetCheckpoint(42)
+                cp2.wait()
