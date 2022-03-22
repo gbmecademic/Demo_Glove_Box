@@ -20,12 +20,12 @@ class SetupWindow(QtWidgets.QMainWindow, SetupWindow.Ui_MainWindow):
         self.defaul_pick = [[57.7950,186.1550,80.7050,-0.0000,-0.0000,-90.0000],
                             [25.9600,186.1550,80.7050,-0.0000,0.0000,-90.0000], 
                             [-6.2800,186.1550,80.7050,-0.0000,0.0000,-90.0000], 
-                            [58.4135,236.8031,81.7342,0.0000,-0.1620,90.0000], 
-                            [26.9986,238.5881,81.6454,-0.0000,-0.1620,90.0000], 
-                            [-4.9963,237.1381,81.5549,-0.0000,-0.1620,90.0000]]
-        self.defaul_place = [[256.7045,21.9299,87.1742,46.7246,-20.3339,71.8831],
-                            [278.0817,-13.5350,87.2791,0.0000,-50.0000,0.0000],
-                            [258.6920,-48.0219,86.2246,-44.8992,-24.8455,-67.5270],
+                            [58.4135,236.8031,80.7342,0.0000,-0.1620,90.0000], 
+                            [26.9986,238.5881,80.6454,-0.0000,-0.1620,90.0000], 
+                            [-4.9963,237.1381,80.5549,-0.0000,-0.1620,90.0000]]
+        self.defaul_place = [[256.7045,21.9299,86.6742,46.7246,-20.3339,71.8831],
+                            [278.0817,-13.5350,86.7791,0.0000,-50.0000,0.0000],
+                            [258.6920,-48.0219,85.7246,-44.8992,-24.8455,-67.5270],
                             [217.0611,-48.6621,84.6120,-44.2944,22.9473,66.5995],
                             [196.4375,-14.0050,84.0717,-1.0921,49.9949,0.8365],
                             [217.4994,22.6281,84.6470,45.5804,23.3668,-67.3643]]
@@ -207,7 +207,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
 
         self.buttonCentrifuge.clicked.connect(self.start_centrifuge)
         self.buttonRobot.clicked.connect(self.connect_to_robot)
-        self.buttonAutoMode.clicked.connect(self.print_data)
+        self.buttonAutoMode.clicked.connect(self.buttonAutoFunction)
 
 
     def open_setup(self):
@@ -349,7 +349,7 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
                 self.CentStatusDisplay.toggle_led(i)
                 QCoreApplication.processEvents()
 
-        self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+        self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
         self.buttonCentrifuge.setEnabled(True)
 
 
@@ -519,14 +519,14 @@ class Application(QtWidgets.QMainWindow, MainWindow.Ui_MainWindow):
         
         for i, st in enumerate(self.rack.vial_selected):
             if st:
-                self.robot.MoveJoints(0, 0, 0, 0, 0, 0)
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
                 pick_point = self.centrifuge.rack_position[i]
                 if self.rack.rack_pick_dir[i]:
                     self.ret_pick_reg(pick_point)
                 else:
                     self.ret_pick_front(pick_point)
 
-                self.robot.MoveJoints(0, 0, 0, 0, 45, 0)
+                self.robot.MoveJoints(0, -40, 40, 0, 0, 0)
 
                 place_point = self.rack.rack_position[i]
                 if self.rack.rack_pick_dir[i]:
@@ -632,12 +632,25 @@ class AutoModeWorker(QObject):
         self.rack = rack
         self.cent = cent
         self.camera = camera
+        self.inter_pos_r1 = [110.875, -162.69, 87.64, 0, 0, 0]
+        self.inter_pos_r2 = [-18, -119.5, 387.55, 0, 0, 0]
 
 
     def run(self):
         self.goFlag = True
-        self.robot.SetJointVel(40)
-        self.robot.SetCartLinVel(25)
+        self.robot.SetJointVel(10)
+        self.robot.SetCartLinVel(30)
+        self.robot2.SetJointVel(10)
+        self.robot2.SetCartLinVel(30)
+        self.robot2.MoveJoints(-175, -32.396, 57.351, 0, -114.955, -90)
+        self.robot2.GripperOpen()
+        cp2 = self.robot2.SetCheckpoint(42)
+        cp2.wait()
+        self.robot.GripperOpen()
+        self.robot.MoveJoints(90, 0, 0, 0, 0, 0)
+        cp1 = self.robot.SetCheckpoint(42)
+        cp1.wait()
+
         while(self.goFlag):
             for rack_pos, pick_dir, cent_pos in zip(self.rack.rack_position, self.rack.rack_pick_dir, self.cent.rack_position):
                 # Pick from the rack

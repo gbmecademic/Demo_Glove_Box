@@ -74,6 +74,8 @@ class Camera():
         self._barcode = self._recv()
         if len(self._barcode) == 14:
             self.valid_barcode = True
+        else:
+            self.valid_barcode = False
 
 
 
